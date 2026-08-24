@@ -4,6 +4,6 @@ module.exports = {
     name: Events.ClientReady,
     once: true,
     execute(client) {
-        console.log(`Uma IA atravessou a barreira negra: ${client.user.tag}`);
+        console.log(`Uma unidade Dharma está online: ${client.user.tag}`);
     },
 };

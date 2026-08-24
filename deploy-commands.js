@@ -1,5 +1,5 @@
 const { REST, Routes } = require('discord.js');
-const { token, 'client-id': clientId} = require('./config.json');
+const { token, 'client-id': clientId, 'guild-id': guildId} = require('./config.json');
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -23,11 +23,23 @@ for (const folder of commandFolders) {
 
 const rest = new REST().setToken(token);
 
-(async () => {
+/* (async () => {
     try {
         console.log(`Iniciando a atualização de ${commands.length} comandos (/)...`);
 
         const data = await rest.put(Routes.applicationCommands(clientId), { body: commands });
+
+        console.log(`Comandos (/) atualizados com sucesso!`);
+    } catch (error) {
+        console.error(error);
+    }
+})();*/
+
+(async () => {
+    try {
+        console.log(`Iniciando a atualização de ${commands.length} comandos (/)...`);
+
+        const data = await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands });
 
         console.log(`Comandos (/) atualizados com sucesso!`);
     } catch (error) {
