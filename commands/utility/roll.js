@@ -1,22 +1,32 @@
 const {SlashCommandBuilder} = require('discord.js');
 
 module.exports = {
-    data: new SlashCommandBuilder().setName('roll').setDescription('Rola um dado de X lados!'),
+    data: new SlashCommandBuilder()
+    .setName('roll')
+    .setDescription('Rola X dado(s) de Y lados!')
+    .addIntegerOption(option => 
+      option
+        .setName('quant')
+        .setDescription('O número de dados que você quer rolar ')
+        .setRequired(true))
+    .addIntegerOption(option => 
+        option.setAutocomplete(true)
+        .setName('lados')
+        .setDescription('O número de lados que o dado terá')
+        .setRequired(true)),
+
     async execute(interaction) {
-        function roll(max) {
-            return Math.floor(Math.random() * max);
-            }
-        await interaction.reply(`Você rolou um ${roll(21)}`);
+        const quant = interaction.options.getInteger('quant');
+        const lados = interaction.options.getInteger('lados');
+
+        const roll = (max) => Math.floor(Math.random() * max) +1;
+
+        const resultados = [];
+        for (let i = 0; i < quant; i++){
+            resultados.push(roll(lados));
+        }
+           
+        await interaction.reply(
+            `Você rodou ${quant}d${lados}: [${resultados.join(', ')}]`);
     }
 }
-/*let result = 0;
-
-while (result !== 20) {
-    result = roll(21);
-    if (result === 0) {
-        result = roll(21);
-    }
-    console.log(`Você rodou um ${result}`);
-} 
-result = roll(21);
-console.log(`Você rodou um ${result}`);*/
