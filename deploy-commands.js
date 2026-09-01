@@ -13,7 +13,7 @@ function carregarComandos(dirPath) {
         const fullPath = path.join(dirPath, entry.name);
 
         if (entry.isDirectory()) {
-            if (entry.name === 'utility') continue;
+            if (entry.name === 'helpers') continue;
             carregarComandos(fullPath);
             continue;
         }

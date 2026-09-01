@@ -4,8 +4,8 @@
 // /dharma editar jogador ...   -> SOMENTE mestre, edita qualquer campo
 
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { getPersonagem, criarPersonagem, atualizarCampo, removerPersonagem } = require('./utility/dharmaManager');
-const { montarPainel } = require('./utility/dharmaDisplay');
+const { getPersonagem, criarPersonagem, atualizarCampo, removerPersonagem } = require('./helpers/dharmaManager');
+const { montarPainel } = require('./helpers/dharmaDisplay');
 
 module.exports = {
   data: new SlashCommandBuilder()

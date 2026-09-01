@@ -17,7 +17,7 @@ for (const entry of commandEntries) {
     const fullPath = path.join(foldersPath, entry.name);
 
     if (entry.isDirectory()) {
-        if (entry.name === 'utility') continue;
+        if (entry.name === 'helpers') continue;
 
         const commandFiles = fs.readdirSync(fullPath)
             .filter((file) => file.endsWith('.js'));
