@@ -5,35 +5,33 @@ const path = require('node:path');
 
 const commands = [];
 const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
 
-for (const folder of commandFolders) {
-    const commandsPath = path.join(foldersPath, folder);
-    const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith('.js'));
-    for (const file of commandFiles) {
-        const filePath = path.join(commandsPath, file);
-        const command = require(filePath);
+function carregarComandos(dirPath) {
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name);
+
+        if (entry.isDirectory()) {
+            if (entry.name === 'utility') continue;
+            carregarComandos(fullPath);
+            continue;
+        }
+
+        if (!entry.isFile() || !entry.name.endsWith('.js')) continue;
+
+        const command = require(fullPath);
         if ('data' in command && 'execute' in command) {
             commands.push(command.data.toJSON());
         } else {
-            console.log(`[AVISO] O comando em ${filePath} está com "data" ou "execute" ausentes.`);
+            console.log(`[AVISO] O arquivo em ${fullPath} não exporta "data" e "execute".`);
         }
     }
 }
 
+carregarComandos(foldersPath);
+
 const rest = new REST().setToken(token);
-
-/* (async () => {
-    try {
-        console.log(`Iniciando a atualização de ${commands.length} comandos (/)...`);
-
-        const data = await rest.put(Routes.applicationCommands(clientId), { body: commands });
-
-        console.log(`Comandos (/) atualizados com sucesso!`);
-    } catch (error) {
-        console.error(error);
-    }
-})();*/
 
 (async () => {
     try {

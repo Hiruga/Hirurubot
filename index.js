@@ -11,20 +11,37 @@ const client = new Client({
 client.commands = new Collection();
 
 const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
+const commandEntries = fs.readdirSync(foldersPath, { withFileTypes: true });
 
-for (const folder of commandFolders) {
-    const commandsPath = path.join(foldersPath, folder);
-    const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith('.js'));
-    for (const file of commandFiles) {
-        const filePath = path.join(commandsPath, file);
-        const command = require(filePath);
+for (const entry of commandEntries) {
+    const fullPath = path.join(foldersPath, entry.name);
 
-        if ('data' in command && 'execute' in command) {
-            client.commands.set(command.data.name, command);
-        } else {
-            console.log(`[AVISO] O comando em ${filePath} está com "data" ou "execute" ausentes.`);
+    if (entry.isDirectory()) {
+        if (entry.name === 'utility') continue;
+
+        const commandFiles = fs.readdirSync(fullPath)
+            .filter((file) => file.endsWith('.js'));
+
+        for (const file of commandFiles) {
+            const filePath = path.join(fullPath, file);
+            const command = require(filePath);
+
+            if ('data' in command && 'execute' in command) {
+                client.commands.set(command.data.name, command);
+            } else {
+                console.log(`[AVISO] O comando em ${filePath} está com "data" ou "execute" ausentes.`);
+            }
         }
+        continue;
+    }
+
+    if (!entry.isFile() || !entry.name.endsWith('.js')) continue;
+
+    const command = require(fullPath);
+    if ('data' in command && 'execute' in command) {
+        client.commands.set(command.data.name, command);
+    } else {
+        console.log(`[AVISO] O comando em ${fullPath} está com "data" ou "execute" ausentes.`);
     }
 }
 

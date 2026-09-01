@@ -48,11 +48,13 @@ module.exports = {
         for (let i = 0; i < quant; i++){
             resultados.push(roll(lados));
         }
+
         let resLen = resultados.length;
         let somaD = 0;
         for (let i = 0; i < resLen; i++){
            somaD = somaD + resultados[i];
         }
+
         if(op != null){
             switch(op){
                 case '+':
@@ -69,6 +71,7 @@ module.exports = {
                     break;
             }
         }
+        
         let text;
         if(op != null && val != null){
             text = '``'+resultF+'`` <- ['+resultados.join(', ')+'] '+quant+'d'+lados+' '+op+' '+val+'.';
