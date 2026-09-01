@@ -1,8 +1,0 @@
-const {SlashCommandBuilder} = require("discord.js");
-
-module.exports = {
-    data: new SlashCommandBuilder().setName('dharma-login').setDescription('Conecta nos servidores do MyDharma'),
-    async execute (interaction) {
-        await interaction.reply('**``Uma unidade Dharma está online.``**');
-    },
-}

@@ -5,7 +5,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const DATA_PATH = path.join(__dirname, '..', '..', 'data', 'personagens.json');
+const DATA_PATH = path.join(__dirname, '..', '..', 'data', 'characters.json');
 
 function carregarDados() {
   if (!fs.existsSync(DATA_PATH)) {
@@ -30,15 +30,13 @@ function criarPersonagem(userId, dadosIniciais) {
 
   dados[userId] = {
     handle: dadosIniciais.handle ?? 'DESCONHECIDO',
-    eddies: dadosIniciais.eddies ?? 0,
-    humanidade: {
-      atual: dadosIniciais.humanidadeAtual ?? 50,
-      max: dadosIniciais.humanidadeMax ?? 50,
-    },
-    vida: {
-      atual: dadosIniciais.vidaAtual ?? 40,
-      max: dadosIniciais.vidaMax ?? 40,
-    },
+    lema: dadosIniciais.lema ?? 'null',
+    comidafavorita: dadosIniciais.comidafavorita ?? 'null',
+    corfavorita: dadosIniciais.corfavorita ?? 'null',
+    animal: dadosIniciais.animal ?? 'null',
+    sociedade: dadosIniciais.sociedade ?? 'null',
+    filosofia: dadosIniciais.filosofia ?? 'null',
+    avatar: dadosIniciais.avatar ?? null,
   };
 
   salvarDados(dados);
@@ -50,7 +48,7 @@ function criarPersonagem(userId, dadosIniciais) {
  * campo: 'handle' | 'eddies' | 'eddies_add' | 'humanidade_atual' |
  *        'humanidade_max' | 'vida_atual' | 'vida_max'
  */
-function atualizarCampo(userId, campo, valor) {
+function atualizarCampo(userId, campo, valor, avatar = null) {
   const dados = carregarDados();
   if (!dados[userId]) return null;
 
@@ -58,26 +56,29 @@ function atualizarCampo(userId, campo, valor) {
     case 'handle':
       dados[userId].handle = String(valor);
       break;
-    case 'eddies':
-      dados[userId].eddies = Number(valor);
+    case 'lema':
+      dados[userId].lema = String(valor);
       break;
-    case 'eddies_add':
-      dados[userId].eddies += Number(valor);
+    case 'comidafavorita':
+      dados[userId].comidafavorita = String(valor);
       break;
-    case 'humanidade_atual':
-      dados[userId].humanidade.atual = Number(valor);
+    case 'corfavorita':
+      dados[userId].corfavorita = String(valor);
       break;
-    case 'humanidade_max':
-      dados[userId].humanidade.max = Number(valor);
+    case 'animal':
+      dados[userId].animal = String(valor);
       break;
-    case 'vida_atual':
-      dados[userId].vida.atual = Number(valor);
+    case 'sociedade':
+      dados[userId].sociedade = String(valor);
       break;
-    case 'vida_max':
-      dados[userId].vida.max = Number(valor);
+    case 'filosofia':
+      dados[userId].filosofia = String(valor);
       break;
     default:
       return null;
+  }
+  if (avatar) {
+    dados[userId].avatar = avatar;
   }
 
   salvarDados(dados);
