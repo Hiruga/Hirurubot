@@ -1,7 +1,8 @@
 // utils/dharmaDisplay.js
 // Monta a "tela" do app do Chip Dharma como texto para um code block ```ansi.
 
-const { cor, limparAnsi } = require('./ansi');
+const { EmbedBuilder } = require('discord.js');
+const { cor, limparAnsi, resolverCor, hexDaCor } = require('./ansi');
 
 const LARGURA = 34; // largura interna útil da caixa (em caracteres)
 
@@ -11,44 +12,96 @@ function preencherLinha(texto) {
   return `║ ${texto}${' '.repeat(espacos)} ║`;
 }
 
-function barraDe(atual, max, tamanho = 10) {
-  const proporcao = max > 0 ? Math.max(0, Math.min(1, atual / max)) : 0;
-  const preenchido = Math.round(proporcao * tamanho);
-  return '█'.repeat(preenchido) + '░'.repeat(tamanho - preenchido);
+/** Quebra um texto simples (sem códigos ANSI) em linhas de até `largura` chars. */
+function quebrarTexto(texto, largura) {
+  const palavras = String(texto ?? '').split(/\s+/).filter(Boolean);
+  const linhas = [];
+  let atual = '';
+
+  for (const palavra of palavras) {
+    const candidato = atual ? `${atual} ${palavra}` : palavra;
+
+    if (candidato.length > largura) {
+      if (atual) linhas.push(atual);
+
+      if (palavra.length > largura) {
+        // palavra sozinha maior que a largura disponível: quebra forçada
+        let resto = palavra;
+        while (resto.length > largura) {
+          linhas.push(resto.slice(0, largura));
+          resto = resto.slice(largura);
+        }
+        atual = resto;
+      } else {
+        atual = palavra;
+      }
+    } else {
+      atual = candidato;
+    }
+  }
+
+  if (atual) linhas.push(atual);
+  return linhas.length ? linhas : [''];
 }
 
-// Verde saudável, amarelo em alerta, vermelho crítico — dá pro jogador
-// sentir o personagem "quebrando" conforme perde humanidade/vida.
-function corPorProporcao(atual, max) {
-  const proporcao = max > 0 ? atual / max : 0;
-  if (proporcao > 0.7) return 'verde';
-  if (proporcao > 0.35) return 'amarelo';
-  return 'vermelho';
+/**
+ * Monta uma ou mais linhas da caixa para um campo "RÓTULO: valor",
+ * quebrando o valor automaticamente quando não cabe na largura da caixa.
+ */
+function linhaCampo(rotulo, valor, { corTexto = 'branco', corRotulo = 'branco', negritoTexto = false } = {}) {
+  const prefixo = `${rotulo}: `;
+  const larguraDisponivel = Math.max(LARGURA - prefixo.length, 8);
+  const linhasTexto = quebrarTexto(valor && valor !== 'null' ? valor : '—', larguraDisponivel);
+
+  return linhasTexto.map((linha, indice) => {
+    if (indice === 0) {
+      return preencherLinha(`${cor(prefixo, corRotulo, { negrito: true })}${cor(linha, corTexto, { negrito: negritoTexto })}`);
+    }
+    return preencherLinha(`${' '.repeat(prefixo.length)}${cor(linha, corTexto, { negrito: negritoTexto })}`);
+  });
 }
 
 function montarPainel(personagem) {
-  const { handle, eddies, humanidade, vida } = personagem;
+  const {
+    handle,
+    lema,
+    comidafavorita,
+    corfavorita,
+    animal,
+    sociedade,
+    filosofia,
+  } = personagem;
 
-  const corHumanidade = corPorProporcao(humanidade.atual, humanidade.max);
-  const corVida = corPorProporcao(vida.atual, vida.max);
+  // Se o jogador escreveu o nome de uma cor suportada (ex.: "verde", "azul"),
+  // o próprio campo COR FAV é exibido nessa cor.
+  const corDaCorFavorita = resolverCor(corfavorita) ?? 'branco';
 
   const linhas = [
     `╔${'═'.repeat(LARGURA + 2)}╗`,
-    preencherLinha(cor('CHIP DHARMA — v2.1.7', 'ciano', { negrito: true })),
+    preencherLinha(cor('CHIP DHARMA — v0.6.7', 'ciano', { negrito: true })),
     preencherLinha(cor('ACESSANDO PERFIL...', 'cinza')),
     `╠${'═'.repeat(LARGURA + 2)}╣`,
-    preencherLinha(`HANDLE: ${cor(handle, 'ciano', { negrito: true })}`),
-    preencherLinha(`EDDIES: ${cor('¤ ' + eddies.toLocaleString('pt-BR'), 'amarelo')}`),
-    preencherLinha(
-      `HUMAN.: ${cor(barraDe(humanidade.atual, humanidade.max), corHumanidade)} ${humanidade.atual}/${humanidade.max}`
-    ),
-    preencherLinha(
-      `VIDA..: ${cor(barraDe(vida.atual, vida.max), corVida)} ${vida.atual}/${vida.max}`
-    ),
+    ...linhaCampo('HANDLE', handle, { corTexto: 'ciano', negritoTexto: true }),
+    ...linhaCampo('LEMA', lema),
+    ...linhaCampo('COMIDA', comidafavorita),
+    ...linhaCampo('COR FAV', corfavorita, { corTexto: corDaCorFavorita }),
+    ...linhaCampo('ANIMAL', animal),
+    ...linhaCampo('SOCIEDADE', sociedade),
+    ...linhaCampo('FILOSOFIA', filosofia),
     `╚${'═'.repeat(LARGURA + 2)}╝`,
   ];
 
-  return '```ansi\n' + linhas.join('\n') + '\n```';
+  const conteudo = '```ansi\n' + linhas.join('\n') + '\n```';
+
+  if (!personagem.avatar) {
+    return { content: conteudo };
+  }
+
+  const embed = new EmbedBuilder()
+    .setColor(hexDaCor(corDaCorFavorita))
+    .setThumbnail(personagem.avatar);
+
+  return { content: conteudo, embeds: [embed] };
 }
 
 module.exports = { montarPainel };

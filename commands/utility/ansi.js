@@ -33,4 +33,46 @@ function limparAnsi(texto) {
   return texto.replace(/\u001b\[[0-9;]*m/g, '');
 }
 
-module.exports = { cor, limparAnsi, RESET, CORES };
+/** Normaliza texto (minúsculas, sem acento, sem espaços nas pontas). */
+function normalizar(texto) {
+  return String(texto ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+/**
+ * Tenta resolver um texto livre (ex.: campo "corfavorita" digitado pelo
+ * jogador) para uma das chaves válidas de CORES. Retorna null se não bater
+ * com nenhuma cor suportada.
+ * @param {string} nome
+ * @returns {keyof typeof CORES | null}
+ */
+function resolverCor(nome) {
+  const chave = normalizar(nome);
+  return Object.prototype.hasOwnProperty.call(CORES, chave) ? chave : null;
+}
+
+// Equivalente em hex de cada cor, para usar em EmbedBuilder#setColor
+// (embeds do Discord não entendem código ANSI, só hex/int).
+const CORES_HEX = {
+  cinza: 0x4f545c,
+  vermelho: 0xed4245,
+  verde: 0x57f287,
+  amarelo: 0xfee75c,
+  azul: 0x5865f2,
+  rosa: 0xeb459e,
+  ciano: 0x2bffff,
+  branco: 0xffffff,
+};
+
+/**
+ * Retorna o hex correspondente a uma chave de CORES (para embeds).
+ * @param {keyof typeof CORES} corNome
+ */
+function hexDaCor(corNome) {
+  return CORES_HEX[corNome] ?? CORES_HEX.branco;
+}
+
+module.exports = { cor, limparAnsi, normalizar, resolverCor, hexDaCor, RESET, CORES, CORES_HEX };
