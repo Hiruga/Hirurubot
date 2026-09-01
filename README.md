@@ -6,9 +6,9 @@ Later on I'll try to get better with text styles and all, hope it make atleast s
 All commands are written in portuguese right now, and they answer only in portuguese
 The core four commands for Dharma are
 
-"dharma-criar" - It creates your character into MyDharma system.
-"dharma-ler" - It shows your character's data.
-"dharma-editar" - It edits your character's data.
-"dharma-deletar" - It deletes your character.
+"dharma-criar" - It creates your character into MyDharma system.<br>
+"dharma-ler" - It shows your character's data. <br>
+"dharma-editar" - It edits your character's data. <br>
+"dharma-deletar" - It deletes your character.<br>
 
 It also does have the other commands but they're nothing but try and error studies.
